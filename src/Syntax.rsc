@@ -11,23 +11,47 @@ start syntax Form
   = "form" Id name "{" Question* questions "}"; 
 
 // TODO: question, computed question, block, if-then-else, if-then
-syntax Question = ;
+syntax Question
+  = Str Id ":" Type
+  | Str Id ":" Type "=" Expr
+  | "{" Question* questions "}" // ?
+  | "if" "(" Id ")" "{" Question* questions "}"
+  | "if" "(" Id ")" "{" Question* questions "}" "else" "{" Question* questions "}"
+  ;
 
 // TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
 // Think about disambiguation using priorities and associativity
 // and use C/Java style precedence rules (look it up on the internet)
+keyword Keywords = "true" | "false";
+
 syntax Expr 
-  = Id \ "true" \ "false" // true/false are reserved keywords.
-  ;
+  = Id \ Keywords
+  | left ( "+" Expr
+         | "-" Expr 
+         )
+  | right "!" Expr
+  > left ( Expr "*" Expr
+         | Expr "/" Expr
+         )
+  > left ( Expr "+" Expr
+         | Expr "-" Expr
+         )
+  > left ( Expr "\<" Expr
+         | Expr "\<=" Expr
+         | Expr "\>" Expr
+         | Expr "\>=" Expr
+         )
+  > left ( Expr "==" Expr
+         | Expr "!=" Expr
+         )
+  > left Expr "&&" Expr
+  > left Expr "||" Expr
+  ; // TODO: literals
   
-syntax Type = ;
+syntax Type = "boolean" | "integer";
 
-lexical Str = ;
+lexical Str = [\"] ![\"]* [\"]; // slightly simplified
 
-lexical Int 
-  = ;
+lexical Int = "-"? [0-9]*;
 
-lexical Bool = ;
-
-
-
+lexical Bool = "true" | "false";
