@@ -6,28 +6,25 @@ extend lang::std::Id;
 /*
  * Concrete syntax of QL
  */
-
-start syntax Form 
-  = "form" Id name "{" Question* questions "}"; 
-
-// TODO: question, computed question, block, if-then-else, if-then
-syntax Question
-  = Str Id ":" Type
-  | Str Id ":" Type "=" Expr
-  | "{" Question* questions "}" // ?
-  | "if" "(" Id ")" "{" Question* questions "}"
-  | "if" "(" Id ")" "{" Question* questions "}" "else" "{" Question* questions "}"
-  ;
-
-// TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
-// Think about disambiguation using priorities and associativity
-// and use C/Java style precedence rules (look it up on the internet)
 keyword Keywords = "true" | "false";
+
+start syntax Form = "form" Id name Block;
+
+syntax Block = "{" Statement* statements "}"; 
+syntax Statement = Question | ComputedQuestion | IfThen | IfThenElse;
+syntax Question = Str Id ":" Type;
+syntax ComputedQuestion = Str Id ":" Type "=" Expr;
+//  | "{" Question* questions "}" // ?
+syntax IfThen = "if" "(" Expr ")" Block;
+syntax IfThenElse = "if" "(" Expr ")" Block "else" Block;
 
 syntax Expr 
   = Id \ Keywords
-  | left ( "+" Expr
-         | "-" Expr 
+  | Int
+  | Str
+  | Bool
+  | left ( "+" Expr // TODO: Fix ambiguity with Id
+         | "-" Expr // TODO: Fix ambiguity with Id
          )
   | right "!" Expr
   > left ( Expr "*" Expr
@@ -46,12 +43,12 @@ syntax Expr
          )
   > left Expr "&&" Expr
   > left Expr "||" Expr
-  ; // TODO: literals
+  ;
   
 syntax Type = "boolean" | "integer";
 
-lexical Str = [\"] ![\"]* [\"]; // slightly simplified
+lexical Str = [\"] ![\"]* [\"]; 
 
-lexical Int = "-"? [0-9]*;
+lexical Int = "-"? [0-9]*; // TODO: Fix ambiguity "-" with Id
 
 lexical Bool = "true" | "false";
