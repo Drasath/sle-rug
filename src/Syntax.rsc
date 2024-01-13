@@ -8,13 +8,13 @@ extend lang::std::Id;
  */
 keyword Keywords = "true" | "false";
 
-start syntax Form = "form" Id name Block;
+start syntax Form = @Foldable "form" Id name Block block;
 
 syntax Block = "{" Statement* statements "}"; 
-syntax Statement = Question | ComputedQuestion | IfThen | IfThenElse;
-syntax Question = Str Id ":" Type;
-syntax ComputedQuestion = Str Id ":" Type "=" Expr;
-//  | "{" Question* questions "}" // ?
+syntax Statement = Question question | ComputedQuestion question| IfThen | IfThenElse;
+syntax Question = Str Id variable ":" Type type;
+syntax ComputedQuestion = Str Id variable ":" Type type "=" Expr computation;
+//  | "{" Question* questions "}" // allow blocks?
 syntax IfThen = "if" "(" Expr ")" Block;
 syntax IfThenElse = "if" "(" Expr ")" Block "else" Block;
 
@@ -23,6 +23,7 @@ syntax Expr
   | Int
   | Str
   | Bool
+  | "(" Expr ")"
   | left ( "+" Expr // TODO: Fix ambiguity with Id
          | "-" Expr // TODO: Fix ambiguity with Id
          )
