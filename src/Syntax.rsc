@@ -6,17 +6,35 @@ extend lang::std::Id;
 /*
  * Concrete syntax of QL
  */
-keyword Keywords = "true" | "false";
 
-start syntax Form = @Foldable "form" Id name Block block;
+keyword Keywords
+  = "true" | "false";
 
-syntax Block = "{" Statement* statements "}"; 
-syntax Statement = Question question | ComputedQuestion question| IfThen | IfThenElse;
-syntax Question = Str Id variable ":" Type type;
-syntax ComputedQuestion = Str Id variable ":" Type type "=" Expr computation;
-//  | "{" Question* questions "}" // allow blocks?
-syntax IfThen = "if" "(" Expr ")" Block;
-syntax IfThenElse = "if" "(" Expr ")" Block "else" Block;
+start syntax Form
+  = @Foldable "form" Id name Block block;
+
+syntax Block
+  = "{" Statement* statements "}"; 
+
+syntax Statement
+  = Question question
+  | ComputedQuestion computedQuestion
+  | IfThen ifThen
+  | IfThenElse ifThenElse
+  | Block block
+  ;
+
+syntax Question
+  = Str Id variable ":" Type type;
+
+syntax ComputedQuestion
+  = Str Id variable ":" Type type "=" Expr expression;
+
+syntax IfThen
+  = @Foldable "if" "(" Expr condition ")" Block thenBlock;
+
+syntax IfThenElse
+  = @Foldable "if" "(" Expr condition ")" Block thenBlock "else" Block elseBlock;
 
 syntax Expr 
   = Id \ Keywords
@@ -46,10 +64,14 @@ syntax Expr
   > left Expr "||" Expr
   ;
   
-syntax Type = "boolean" | "integer";
+syntax Type
+  = "boolean" | "integer";
 
-lexical Str = [\"] ![\"]* [\"]; 
+lexical Str
+  = [\"] ![\"]* [\"]; 
 
-lexical Int = "-"? [0-9]*; // TODO: Fix ambiguity "-" with Id
+lexical Int
+  = "-"? [0-9]*; // TODO: Fix ambiguity "-" with Id
 
-lexical Bool = "true" | "false";
+lexical Bool
+  = "true" | "false";

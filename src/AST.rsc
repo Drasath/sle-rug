@@ -16,10 +16,11 @@ data ABlock(loc src = |tmp:///|)
   ;
 
 data AStatement(loc src = |tmp:///|)
-  = sQuestion(AQuestion question)
-  | sComputedQuestion(AComputedQuestion computedQuestion)
-  // | IfThen(AIfThen ifThen)
-  // | IfThenElse(AIfThenElse ifThenElse)
+  = statement(AQuestion question)
+  | statement(AComputedQuestion computedQuestion)
+  | statement(AIfThen ifThen)
+  | statement(AIfThenElse ifThenElse)
+  | statement(ABlock block)
   ;
 
 data AQuestion(loc src = |tmp:///|)
@@ -31,15 +32,16 @@ data AComputedQuestion(loc src = |tmp:///|)
   ;
 
 data AIfThen(loc src = |tmp:///|)
-  = ifThen(AExpr guard, ABlock block)
+  = ifThen(AExpr condition, ABlock thenBlock)
   ;
 
 data AIfThenElse(loc src = |tmp:///|)
-  = ifThenElse(AExpr guard, ABlock ifBlock, ABlock elseBlock)
+  = ifThenElse(AExpr condition, ABlock thenBlock, ABlock elseBlock)
   ;
 
 data AExpr(loc src = |tmp:///|)
   = ref(AId id)
+  //| \bool(Bool \value)
   ;
 
 data AId(loc src = |tmp:///|)

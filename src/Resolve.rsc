@@ -26,9 +26,9 @@ RefGraph resolve(AForm f) = <us, ds, us o ds>
   when Use us := uses(f), Def ds := defs(f);
 
 Use uses(AForm f) {
-  return {}; 
+  return {<|tmp:///|, "a">}; // uses only appear in expressions
 }
 
 Def defs(AForm f) {
-  return {}; 
+  return {<"",|tmp:///|>}; // definitions only appear in questions and conditions
 }

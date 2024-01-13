@@ -4,12 +4,8 @@ import Syntax;
 import AST;
 
 import ParseTree;
-import IO;
 
 /*
- * Implement a mapping from concrete syntax trees (CSTs) to abstract syntax trees (ASTs)
- *
- * - Use switch to do case distinction with concrete patterns (like in Hack your JS) 
  * - Map regular CST arguments (e.g., *, +, ?) to lists 
  *   (NB: you can iterate over * / + arguments using `<-` in comprehensions or for-loops).
  * - Map lexical nodes to Rascal primitive types (bool, int, str)
@@ -21,32 +17,44 @@ AForm cst2ast(start[Form] sf) {
   return form("f.name", cst2ast(f.block), src=f.src); 
 }
 
-default ABlock cst2ast(Block b) {
+ABlock cst2ast(Block b) {
   return block([cst2ast(statement) | statement <- b.statements ]);
 }
 
-default AStatement cst2ast(Statement s) {
+AStatement cst2ast(Statement s) {
   switch (s) {
-    case (Statement)`<ComputedQuestion x>`: return sComputedQuestion(cst2ast(s.question));
-    default: return sQuestion(cst2ast(s.question));
+    case (Statement)`<Question x>`: return statement(cst2ast(x));
+    case (Statement)`<ComputedQuestion x>`: return statement(cst2ast(x));
+    case (Statement)`<IfThen x>`: return statement(cst2ast(x));
+    case (Statement)`<IfThenElse x>`: return statement(cst2ast(x));
+    case (Statement)`<Block x>`: return statement(cst2ast(x));
+    default: throw "Unhandled statement: <s>";
   }
 }
 
-default AComputedQuestion cst2ast(ComputedQuestion cq) {
-  return computedQuestion(id("<cq.variable>"), \type("<cq.\type>"), ref(id("a")));
+AQuestion cst2ast(Question q) {
+  return question(id("<q.variable>"), \type("<q.\type>"));
 }
 
-default AQuestion cst2ast(Question q) {
-  return question(id("<q.variable>"), \type("<q.\type>"));
-  // throw "Not yet implemented <q>";
+AComputedQuestion cst2ast(ComputedQuestion cq) {
+  return computedQuestion(id("<cq.variable>"), \type("<cq.\type>"), cst2ast(cq.expression));
+}
+
+AIfThen cst2ast(IfThen \if) {
+  return ifThen(cst2ast(\if.condition), cst2ast(\if.thenBlock));
+}
+
+AIfThenElse cst2ast(IfThenElse \if) {
+  return ifThenElse(cst2ast(\if.condition), cst2ast(\if.thenBlock), cst2ast(\if.elseBlock));
+
 }
 
 AExpr cst2ast(Expr e) {
   switch (e) {
     case (Expr)`<Id x>`: return ref(id("<x>", src=x.src), src=x.src);
-    // case (Expr)`<Int x>`: return ref(id("<x>", src=x.src), src=x.src);
-    // case (Expr)`<Str x>`: return ref(id("<x>", src=x.src), src=x.src);
-    // case (Expr)`<Bool x>`: return ref(id("<x>", src=x.src), src=x.src);
+    case (Expr)`<Int x>`: return ref(id("<x>", src=x.src), src=x.src);
+    case (Expr)`<Str x>`: return ref(id("<x>", src=x.src), src=x.src);
+    case (Expr)`<Bool x>`: return ref(id("<x>", src=x.src), src=x.src);
     
     default: throw "Unhandled expression: <e>";
   }
