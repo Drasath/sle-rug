@@ -33,11 +33,11 @@ AStatement cst2ast(Statement s) {
 }
 
 AQuestion cst2ast(Question q) {
-  return question(id("<q.variable>"), \type("<q.\type>"));
+  return question(id("<q.variable>", src=q.src), \type("<q.\type>"));
 }
 
 AComputedQuestion cst2ast(ComputedQuestion cq) {
-  return computedQuestion(id("<cq.variable>"), \type("<cq.\type>"), cst2ast(cq.expression));
+  return computedQuestion(id("<cq.variable>", src=cq.src), \type("<cq.\type>"), cst2ast(cq.expression));
 }
 
 AIfThen cst2ast(IfThen \if) {
