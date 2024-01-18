@@ -26,9 +26,40 @@ void compile(AForm f) {
 }
 
 HTMLElement form2html(AForm f) {
-  return html([]);
+  return html([
+    head([
+      title([
+        text(f.name)
+      ])
+    ]),
+    body([
+      h1([
+        text(f.name)
+      ]),
+      block2html(f.block)
+    ])
+  ]);
+}
+
+HTMLElement block2html(ABlock b) {
+  return div(
+    [question2html(q) | /AQuestion q <- b.statements]
+  );
+}
+
+HTMLElement question2html(AQuestion q) {
+  return div([
+    label([
+      text(q.label)
+    ]),
+    input()
+  ]);
 }
 
 str form2js(AForm f) {
-  return "";
+  return `
+    function ${f.name}() {
+      // TODO
+    }
+    `;
 }
