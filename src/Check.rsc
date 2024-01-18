@@ -17,7 +17,12 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  return {}; 
+  TEnv tenv = {};
+  for (/question(AId x, str label, AType t) := f) {
+    tenv += { <|unknown:///|, x, label, t> };
+  }
+
+  return tenv; 
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {

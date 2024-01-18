@@ -2,9 +2,6 @@ module AST
 
 /*
  * Define Abstract Syntax for QL
- *
- * - complete the following data types
- * - make sure there is an almost one-to-one correspondence with the grammar
  */
 
 data AForm(loc src = |tmp:///|)
@@ -24,7 +21,7 @@ data AStatement(loc src = |tmp:///|)
   ;
 
 data AQuestion(loc src = |tmp:///|)
-  = question(AId variable, AType \type)
+  = question(AId variable, str label, AType \type)
   ;
 
 data AComputedQuestion(loc src = |tmp:///|)
@@ -41,7 +38,22 @@ data AIfThenElse(loc src = |tmp:///|)
 
 data AExpr(loc src = |tmp:///|)
   = ref(AId id)
-  //| \bool(Bool \value)
+  | \int(int \intval)
+  | \str(str \strval)
+  | \bool(bool \boolval)
+  | neg(AExpr expr)
+  | mul(AExpr left, AExpr right)
+  | div(AExpr left, AExpr right)
+  | add(AExpr left, AExpr right)
+  | sub(AExpr left, AExpr right)
+  | l(AExpr left, AExpr right)
+  | leq(AExpr left, AExpr right)
+  | g(AExpr left, AExpr right)
+  | geq(AExpr left, AExpr right)
+  | eq(AExpr left, AExpr right)
+  | neq(AExpr left, AExpr right)
+  | and(AExpr left, AExpr right)
+  | or(AExpr left, AExpr right)
   ;
 
 data AId(loc src = |tmp:///|)

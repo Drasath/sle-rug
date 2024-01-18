@@ -25,10 +25,10 @@ syntax Statement
   ;
 
 syntax Question
-  = Str Id variable ":" Type type;
+  = Str label Id variable ":" Type type;
 
 syntax ComputedQuestion
-  = Str Id variable ":" Type type "=" Expr expression;
+  = Str label Id variable ":" Type type "=" Expr expression;
 
 syntax IfThen
   = @Foldable "if" "(" Expr condition ")" Block thenBlock;
@@ -42,9 +42,6 @@ syntax Expr
   | Str
   | Bool
   | "(" Expr ")"
-  | left ( "+" Expr // TODO: Fix ambiguity with Id
-         | "-" Expr // TODO: Fix ambiguity with Id
-         )
   | right "!" Expr
   > left ( Expr "*" Expr
          | Expr "/" Expr
@@ -71,7 +68,7 @@ lexical Str
   = [\"] ![\"]* [\"]; 
 
 lexical Int
-  = "-"? [0-9]*; // TODO: Fix ambiguity "-" with Id
+  = [0-9]*;
 
 lexical Bool
   = "true" | "false";

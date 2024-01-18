@@ -9,7 +9,7 @@ public str Test = "form taxOfficeExample
     hasMaintLoan: boolean
     
   \"Did you sell a house in 2010?\"
-    hasSoldHouse: boolean = 3
+    hasSoldHouse: boolean = 3 && \"aaa\"
 
   if (1) {
   } else {
