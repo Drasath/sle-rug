@@ -25,7 +25,7 @@ data AQuestion(loc src = |tmp:///|)
   ;
 
 data AComputedQuestion(loc src = |tmp:///|)
-  = computedQuestion(AId variable, AType \type, AExpr expression)
+  = computedQuestion(AId variable, str label, AType \type, AExpr expression)
   ;
 
 data AIfThen(loc src = |tmp:///|)

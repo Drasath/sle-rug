@@ -40,9 +40,8 @@ AForm flatten(AForm f) {
  */
  
 start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
-   return f; 
+  // for (loc l <- useDef.uses[newName]) {
+  //   f = replace(f, l, newName, useOrDef);
+  // }
+  return f; 
 } 
- 
- 
- 
-

@@ -30,9 +30,18 @@ HTMLElement form2html(AForm f) {
     head([
       title([
         text(f.name)
+      ]),
+      style([
+        text("body { font-family: sans-serif; }"),
+        text("label { display: block; }"),
+        text("input[type=text] { width: 100%; }"),
+        text("input[type=number] { width: 100%; }"),
+        text("input[type=checkbox] { width: 100%; }"),
+        text("input[readonly] { background-color: #eee; }")
       ])
     ]),
     body([
+      script([], src="https://unpkg.com/vue@3/dist/vue.global.js"),
       h1([
         text(f.name)
       ]),
@@ -42,24 +51,51 @@ HTMLElement form2html(AForm f) {
 }
 
 HTMLElement block2html(ABlock b) {
-  return div(
-    [question2html(q) | /AQuestion q <- b.statements]
-  );
+  return div([statement2html(s) | s <- b.statements]);
+}
+
+HTMLElement statement2html(AStatement s) {
+  switch (s) {
+    case /AIfThen ifThen : return ifthen2html(ifThen);
+    case /ABlock b : return block2html(b);
+    case /AQuestion q : return question2html(q);
+    case /AComputedQuestion cq : return computedquestion2html(cq);
+    default : return text("<s>");
+  }
+}
+
+HTMLElement ifthen2html(AIfThen ifThen) {
+  return div([
+    text("if"),
+    block2html(ifThen.thenBlock)
+  ]);
 }
 
 HTMLElement question2html(AQuestion q) {
+  str qtype = "text";
+  switch(q.\type.a) {
+    case "boolean" : qtype = "checkbox";
+    case "integer" : qtype = "number";
+    default : qtype = "text";
+  }
   return div([
     label([
       text(q.label)
+    ], \for=q.variable.name),
+    input(\type=qtype, \name=q.variable.name, \id=q.variable.name)
+  ]);
+}
+
+HTMLElement computedquestion2html(AComputedQuestion cq) {
+  str qtype = "text";
+  return div([
+    label([
+      text(cq.label)
     ]),
-    input()
+    input(readonly="true", \type=qtype)
   ]);
 }
 
 str form2js(AForm f) {
-  return `
-    function ${f.name}() {
-      // TODO
-    }
-    `;
+  return "";
 }
