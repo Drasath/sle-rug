@@ -56,19 +56,19 @@ AExpr cst2ast(Expr e) {
     case (Expr)`<Int x>`: return \int(toInt("<x>"), src=x.src);
     case (Expr)`<Str x>`: return \str("<x>", src=x.src);
     case (Expr)`<Bool x>`: return \bool("<x>"=="true", src=x.src);
-    case (Expr)`!<Expr x>`: return neg(cst2ast(x), src=x.src);
-    case (Expr)`<Expr x> * <Expr y>`: return mul(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> / <Expr y>`: return div(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> + <Expr y>`: return add(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> - <Expr y>`: return sub(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> \< <Expr y>`: return l(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> \<= <Expr y>`: return leq(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> \> <Expr y>`: return g(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> \>= <Expr y>`: return geq(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> == <Expr y>`: return eq(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> != <Expr y>`: return neq(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> && <Expr y>`: return and(cst2ast(x), cst2ast(y), src=x.src);
-    case (Expr)`<Expr x> || <Expr y>`: return or(cst2ast(x), cst2ast(y), src=x.src);
+    case (Expr)`!<Expr x>`: return unaryOp(cst2ast(x), "!", src=x.src);
+    case (Expr)`<Expr x> * <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "*", src=x.src);
+    case (Expr)`<Expr x> / <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "/", src=x.src);
+    case (Expr)`<Expr x> + <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "+", src=x.src);
+    case (Expr)`<Expr x> - <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y),  "-", src=x.src);
+    case (Expr)`<Expr x> \< <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "\<", src=x.src);
+    case (Expr)`<Expr x> \<= <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "\<=", src=x.src);
+    case (Expr)`<Expr x> \> <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "\>", src=x.src);
+    case (Expr)`<Expr x> \>= <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "\>=", src=x.src);
+    case (Expr)`<Expr x> == <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "==", src=x.src);
+    case (Expr)`<Expr x> != <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "!=", src=x.src);
+    case (Expr)`<Expr x> && <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "&&", src=x.src);
+    case (Expr)`<Expr x> || <Expr y>`: return binaryOp(cst2ast(x), cst2ast(y), "||", src=x.src);
     default: throw "Unhandled expression: <e>";
   }
 }

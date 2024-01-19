@@ -48,14 +48,17 @@ HTMLElement form2html(AForm f) {
       h1([
         text(f.name)
       ]),
-      block2html(f.block),
+      form(
+        [block2html(f.block)],
+        \id="app"
+      ),
       script([], src="tax.js")
     ])
   ]);
 }
 
-HTMLElement block2html(ABlock b) {
-  return div([statement2html(s) | s <- b.statements]);
+HTMLElement block2html(ABlock b, str name = "block") {
+  return div([statement2html(s) | s <- b.statements], \name=name);
 }
 
 HTMLElement statement2html(AStatement s) {
@@ -71,14 +74,14 @@ HTMLElement statement2html(AStatement s) {
 
 HTMLElement ifthen2html(AIfThen ifThen) {
   return div([
-    block2html(ifThen.thenBlock)
+    block2html(ifThen.thenBlock, \name="then")
   ], \name="if");
 }
 
 HTMLElement ifthenelse2html(AIfThenElse ifThenElse) {
   return div([
-    block2html(ifThenElse.thenBlock),
-    block2html(ifThenElse.elseBlock)
+    block2html(ifThenElse.thenBlock, \name="then"),
+    block2html(ifThenElse.elseBlock, \name="else")
   ], \name="if-else");
 }
 
@@ -99,20 +102,56 @@ HTMLElement question2html(AQuestion q) {
 
 HTMLElement computedquestion2html(AComputedQuestion cq) {
   str qtype = "text";
+  switch(cq.\type.a) {
+    case "boolean" : qtype = "checkbox";
+    case "integer" : qtype = "number";
+    default : qtype = "text";
+  }
   return div([
     label([
       text(cq.label)
     ]),
-    input(readonly="true", \type=qtype)
+    input(\type=qtype, \name=cq.variable.name, \id=cq.variable.name, \readonly="readonly")
   ]);
 }
 
 str form2js(AForm f) {
-  return "var app = Vue.createApp({
-      data() {
-        return {
+  return "const { createApp, ref } = Vue
+  var app = Vue.createApp({
+        setup() {<for (/AQuestion q := f) {>
+            const <q.variable.name> = ref(\'\');<}>
+            <for (/AComputedQuestion cq := f) {>
+            const <cq.variable.name> = ref(0);<}>
+            <for (/AComputedQuestion cq := f) {>
+            function <cq.variable.name>Evaluation() {
+              <cq.variable.name>.value = <expr2js(cq.expression)>;
+            }<}>
+
+            function updateAll() {<for (/AComputedQuestion cq := f) {>
+              <cq.variable.name>Evaluation();
+              <}>
+            }
+          
+          return {<for (/AQuestion q := f) {>
+            <q.variable.name>,<}><for (/AComputedQuestion cq := f) {>
+            <cq.variable.name>,<}>
+            updateAll
+          }
         }
-      }
+      
     }).mount(\'#app\');
     ";
+}
+
+str expr2js(AExpr e) {
+  switch(e) {
+    case (AExpr) e: ref(id(expr)): return "<expr>.value";
+    case (AExpr) e: \int(intval): return "<intval>";
+    case (AExpr) e: \bool(boolval): return "<boolval>";
+    case (AExpr) e: \str(strval): return "<strval>";
+    case (AExpr) e: unaryOp(expr, op): return op + expr2js(expr);
+    case (AExpr) e: binaryOp(lhs, rhs, op): return expr2js(lhs) + op + expr2js(rhs);
+    
+  }
+  return "0";
 }

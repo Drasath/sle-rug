@@ -19,7 +19,7 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 TEnv collect(AForm f) {
   TEnv tenv = {};
   for (/question(AId x, str label, AType t) := f) {
-    tenv += { <|unknown:///|, x, label, t> };
+    tenv += { <|unknown:///|, x.name, label, t.a> };
   }
 
   return tenv; 
