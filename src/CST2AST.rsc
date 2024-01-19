@@ -38,7 +38,7 @@ default AQuestion cst2ast(Question q) {
 }
 
 AComputedQuestion cst2ast(ComputedQuestion cq) {
-  return computedQuestion(id("<cq.variable>", src=cq.src), cst2ast(cq.\type), cst2ast(cq.expression));
+  return computedQuestion(id("<cq.variable>", src=cq.src), "<cq.label>", cst2ast(cq.\type), cst2ast(cq.expression));
 }
 
 AIfThen cst2ast(IfThen \if) {

@@ -32,8 +32,11 @@ HTMLElement form2html(AForm f) {
         text(f.name)
       ]),
       style([
-        text("body { font-family: sans-serif; }"),
+        text("body { font-family: sans-serif; font-size: 1.2em; width: 80%; margin: auto; user-select: none; }"),
         text("label { display: block; }"),
+        text("div { padding: 1em; }"),
+        text("div div { margin-left: 1em; }"),
+        text("div:nth-child(even) { background-color: #eef; }"),
         text("input[type=text] { width: 100%; }"),
         text("input[type=number] { width: 100%; }"),
         text("input[type=checkbox] { width: 100%; }"),
@@ -45,7 +48,8 @@ HTMLElement form2html(AForm f) {
       h1([
         text(f.name)
       ]),
-      block2html(f.block)
+      block2html(f.block),
+      script([], src="tax.js")
     ])
   ]);
 }
@@ -57,6 +61,7 @@ HTMLElement block2html(ABlock b) {
 HTMLElement statement2html(AStatement s) {
   switch (s) {
     case /AIfThen ifThen : return ifthen2html(ifThen);
+    case /AIfThenElse ifThenElse : return ifthenelse2html(ifThenElse);
     case /ABlock b : return block2html(b);
     case /AQuestion q : return question2html(q);
     case /AComputedQuestion cq : return computedquestion2html(cq);
@@ -66,9 +71,15 @@ HTMLElement statement2html(AStatement s) {
 
 HTMLElement ifthen2html(AIfThen ifThen) {
   return div([
-    text("if"),
     block2html(ifThen.thenBlock)
-  ]);
+  ], \name="if");
+}
+
+HTMLElement ifthenelse2html(AIfThenElse ifThenElse) {
+  return div([
+    block2html(ifThenElse.thenBlock),
+    block2html(ifThenElse.elseBlock)
+  ], \name="if-else");
 }
 
 HTMLElement question2html(AQuestion q) {
@@ -97,5 +108,11 @@ HTMLElement computedquestion2html(AComputedQuestion cq) {
 }
 
 str form2js(AForm f) {
-  return "";
+  return "var app = Vue.createApp({
+      data() {
+        return {
+        }
+      }
+    }).mount(\'#app\');
+    ";
 }
