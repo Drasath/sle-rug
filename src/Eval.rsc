@@ -27,7 +27,25 @@ data Input
 // produce an environment which for each question has a default value
 // (e.g. 0 for int, "" for str etc.)
 VEnv initialEnv(AForm f) {
-  return ();
+  VEnv venv = ();
+
+  list[AQuestion] qs = [q | /AQuestion q <- f];
+  list[AComputedQuestion] cqs = [cq | /AComputedQuestion cq <- f];
+    
+  venv = (q.variable.name : defaultValue(q.\type) | q <- qs);
+  venv += (cq.variable.name : defaultValue(cq.\type) | cq <- cqs);
+  
+  return venv;
+}
+
+
+Value defaultValue(AType t) {
+  switch (t.a) {
+    case "integer": return vint(0);
+    case "boolean": return vbool(false);
+    case "string": return vstr("");
+    default: throw "Unsupported type <t>";
+  }
 }
 
 
@@ -46,6 +64,7 @@ VEnv evalOnce(AForm f, Input inp, VEnv venv) {
 VEnv eval(AQuestion q, Input inp, VEnv venv) {
   // evaluate conditions for branching,
   // evaluate inp and computed questions to return updated VEnv
+  
   return (); 
 }
 

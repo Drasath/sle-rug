@@ -7,7 +7,7 @@ import ParseTree;
 import String;
 
 /*
- * - Map regular CST arguments (e.g., *, +, ?) to lists 
+ * - Map regular CST arguments (e.g., *, +, ?) to lists (TODO: ???)
  *   (NB: you can iterate over * / + arguments using `<-` in comprehensions or for-loops).
  * - Map lexical nodes to Rascal primitive types (bool, int, str)
  * - See the ref example on how to obtain and propagate source locations.
@@ -75,9 +75,10 @@ AExpr cst2ast(Expr e) {
 
 default AType cst2ast(Type t) {
   switch(t) {
-    case (Type) `integer`: return \type("integer");
-    case (Type) `boolean`: return \type("boolean");
-
-    default: throw "Unknown Type: <t>";
+    case (Type) `integer`: return tint();
+    case (Type) `boolean`: return tbool();
+    case (Type) `boolean`: return tstr();
   }
+
+  return tunknown();
 }

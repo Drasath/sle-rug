@@ -20,7 +20,6 @@ import lang::html::IO;
  */
 
 void compile(AForm f) {
-  println("Compiling form " + f.name + " to HTML and Javascript");
   writeFile(f.src[extension="js"].top, form2js(f));
   writeFile(f.src[extension="html"].top, writeHTMLString(form2html(f)));
 }
@@ -87,31 +86,31 @@ HTMLElement ifthenelse2html(AIfThenElse ifThenElse) {
 
 HTMLElement question2html(AQuestion q) {
   str qtype = "text";
-  switch(q.\type.a) {
-    case "boolean" : qtype = "checkbox";
-    case "integer" : qtype = "number";
-    default : qtype = "text";
-  }
+  // switch(q.\type) {
+  //   case \tbool() : qtype = "checkbox";
+  //   case \tint() : qtype = "number";
+  //   default : qtype = "text";
+  // }
   return div([
     label([
       text(q.label)
     ], \for=q.variable.name),
-    input(\type=qtype, \name=q.variable.name, \id=q.variable.name)
+    input(\type=qtype, \name=q.variable.name, \id=q.variable.name, oninput="updateAll()")
   ]);
 }
 
 HTMLElement computedquestion2html(AComputedQuestion cq) {
   str qtype = "text";
-  switch(cq.\type.a) {
-    case "boolean" : qtype = "checkbox";
-    case "integer" : qtype = "number";
-    default : qtype = "text";
-  }
+  // switch(q.\type) {
+  //   case \tbool(): qtype = "checkbox";
+  //   case \tint(): qtype = "number";
+  //   default : qtype = "text";
+  // }
   return div([
     label([
       text(cq.label)
     ]),
-    input(\type=qtype, \name=cq.variable.name, \id=cq.variable.name, \readonly="")
+    input(\type=qtype, \name=cq.variable.name, \id=cq.variable.name, readonly="")
   ]);
 }
 

@@ -49,4 +49,8 @@ data AId(loc src = |tmp:///|)
   = id(str name);
 
 data AType(loc src = |tmp:///|)
-  = \type(str a);
+  = tint()
+  | tbool()
+  | tstr()
+  | tunknown()
+  ;

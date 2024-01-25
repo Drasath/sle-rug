@@ -65,7 +65,7 @@ syntax Type
   = "boolean" | "integer";
 
 lexical Str
-  = [\"] ![\"]* [\"]; 
+  = [\"] ![\"]* [\"]; // TODO: allow use of \"
 
 lexical Int
   = [0-9]*;
