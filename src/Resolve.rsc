@@ -42,9 +42,11 @@ Use uses(AForm f) {
 
   // In QL, variables can be used in expressions, which only occur in computed questions, if-then and if-then-else conditions
   // Get all nested expressions in the expression
-  list[AId] ids = [q.expression.id | s <- ss, AComputedQuestion q <- s];
-  ids += [i.condition.id | s <- ss, AIfThen i <- s];
-  ids += [i.condition.id | s <- ss, AIfThenElse i <- s];
+  list[AExpr] expr = [q.expression | s <- ss, AComputedQuestion q <- s];
+  expr += [i.condition | s <- ss, AIfThen i <- s];
+  expr += [i.condition | s <- ss, AIfThenElse i <- s];
+
+  list[AId] ids = [i | e <- expr, /AId i <- e];
 
   return {<c.src, c.name> | c <- ids};
 }

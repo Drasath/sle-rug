@@ -18,22 +18,28 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
   TEnv tenv = {};
-  for (/question(AId x, str label, AType t) := f) {
-    tenv += { <|unknown:///|, x.name, label, t.a> };
+  for (/question(AId x, str label, _) := f) {
+    tenv += { <x.src, x.name, label, tbool()> };
   }
 
   return tenv; 
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
-  return {}; 
+  return { m | /AQuestion q <- f, m <- check(q, tenv, useDef) };
 }
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
-set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
-  return {}; 
+set[Message] check(AQuestion q1, TEnv tenv, UseDef useDef) {
+  set[Message] msgs = {};
+
+  // check for duplicate labels
+      msgs += { error("Duplicate label <q1.label>", q1.src) };
+    
+  
+  return msgs; 
 }
 
 // Check operand compatibility with operators.
@@ -45,6 +51,12 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
   switch (e) {
     case ref(AId x):
       msgs += { error("Undeclared question", x.src) | useDef[x.src] == {} };
+    // case add(AExpr lhs, AExpr rhs):
+    //   msgs += check(lhs, tenv, useDef);
+    //   msgs += check(rhs, tenv, useDef);
+    //   if (typeOf(lhs) == typeOf(rhs) == tint()) {
+    //     msgs += { error("Type error", e.src) };
+    //   }
 
     // etc.
   }

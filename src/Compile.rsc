@@ -111,7 +111,7 @@ HTMLElement computedquestion2html(AComputedQuestion cq) {
     label([
       text(cq.label)
     ]),
-    input(\type=qtype, \name=cq.variable.name, \id=cq.variable.name, \readonly="readonly")
+    input(\type=qtype, \name=cq.variable.name, \id=cq.variable.name, \readonly="")
   ]);
 }
 
