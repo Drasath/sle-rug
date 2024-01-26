@@ -36,6 +36,7 @@ syntax IfThen
 syntax IfThenElse
   = @Foldable "if" "(" Expr condition ")" Block thenBlock "else" Block elseBlock;
 
+// TODO: Do not allow empty expressions
 syntax Expr 
   = Id \ Keywords
   | Int
@@ -64,11 +65,13 @@ syntax Expr
 syntax Type
   = "boolean" | "integer";
 
+// TODO: allow use of \" in strings
 lexical Str
-  = [\"] ![\"]* [\"]; // TODO: allow use of \"
+  = [\"] ![\"]* [\"];
 
+// TODO: allow -Int
 lexical Int
-  = [0-9]*;
+  = [\-]? [0-9]+ !>> [0-9];
 
 lexical Bool
   = "true" | "false";

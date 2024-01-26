@@ -40,116 +40,184 @@ HTMLElement form2html(AForm f) {
         text("input[type=number] { width: 100%; }"),
         text("input[type=checkbox] { width: 100%; }"),
         text("input[readonly] { background-color: #eee; }")
-      ])
+      ]),
+      script([], src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js"),
+      script([], src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js")
     ]),
     body([
-      script([], src="https://unpkg.com/vue@3/dist/vue.global.js"),
-      h1([
-        text(f.name)
-      ]),
-      form(
-        [block2html(f.block)],
-        \id="app"
-      ),
+      div([], \id="root"),
       script([], src="tax.js")
     ])
   ]);
 }
 
-HTMLElement block2html(ABlock b, str name = "block") {
-  return div([statement2html(s) | s <- b.statements], \name=name);
+str getInputType(AType t) {
+  switch(t) {
+    case tbool(): return "checkbox";
+    case tint(): return "number";
+    case tstr(): return "text";
+  }
+  return "text";
 }
 
-HTMLElement statement2html(AStatement s) {
-  switch (s) {
-    case /AIfThen ifThen : return ifthen2html(ifThen);
-    case /AIfThenElse ifThenElse : return ifthenelse2html(ifThenElse);
-    case /ABlock b : return block2html(b);
-    case /AQuestion q : return question2html(q);
-    case /AComputedQuestion cq : return computedquestion2html(cq);
-    default : return text("<s>");
+str question2js(AQuestion q) {
+  if (q.\type == tbool()) {
+    return "React.createElement(BooleanQuestion, { label: "+q.label+", variable: \""+q.variable.name+"\", handleInputChange: handleInputChange })";
+  } else {
+    return "React.createElement(Question, { label: "+q.label+", variable: \""+q.variable.name+"\", type:\""+getInputType(q.\type)+"\", handleInputChange: handleInputChange })";
   }
 }
 
-HTMLElement ifthen2html(AIfThen ifThen) {
-  return div([
-    block2html(ifThen.thenBlock, \name="then")
-  ], \name="if");
+str computedQuestion2js(AComputedQuestion cq) {
+  return "React.createElement(ComputedQuestion, { label: "+cq.label+", type:\""+getInputType(cq.\type)+"\", calculatedValue: calculatedValues[\""+cq.variable.name+"\"] })";
 }
 
-HTMLElement ifthenelse2html(AIfThenElse ifThenElse) {
-  return div([
-    block2html(ifThenElse.thenBlock, \name="then"),
-    block2html(ifThenElse.elseBlock, \name="else")
-  ], \name="if-else");
+str statement2js(AStatement s) {
+  switch(s) {
+    case statement(AQuestion q): return question2js(q);
+    case statement(AComputedQuestion cq): return computedQuestion2js(cq);
+    case statement(AIfThen ifThen): return "React.createElement(IfThen, { condition: <expr2js(ifThen.condition)>, thenBlock: "+block2js(ifThen.thenBlock)+" })";
+    case statement(AIfThenElse ifThenElse): return "";
+    case statement(ABlock b): return block2js(b);
+  }
+
+  return "";
 }
 
-HTMLElement question2html(AQuestion q) {
-  str qtype = "text";
-  // switch(q.\type) {
-  //   case \tbool() : qtype = "checkbox";
-  //   case \tint() : qtype = "number";
-  //   default : qtype = "text";
-  // }
-  return div([
-    label([
-      text(q.label)
-    ], \for=q.variable.name),
-    input(\type=qtype, \name=q.variable.name, \id=q.variable.name, oninput="updateAll()")
-  ]);
-}
-
-HTMLElement computedquestion2html(AComputedQuestion cq) {
-  str qtype = "text";
-  // switch(q.\type) {
-  //   case \tbool(): qtype = "checkbox";
-  //   case \tint(): qtype = "number";
-  //   default : qtype = "text";
-  // }
-  return div([
-    label([
-      text(cq.label)
-    ]),
-    input(\type=qtype, \name=cq.variable.name, \id=cq.variable.name, readonly="")
-  ]);
+str block2js(ABlock b) {
+  str result = "React.createElement(Block, {
+        statements: [";
+  for (s <- b.statements) {
+    result += statement2js(s) + ",\n";
+  }
+  result += "]
+      })";
+  return result;
 }
 
 str form2js(AForm f) {
-  return "const { createApp, ref } = Vue
-  var app = Vue.createApp({
-        setup() {<for (/AQuestion q := f) {>
-            const <q.variable.name> = ref(\'\');<}>
-            <for (/AComputedQuestion cq := f) {>
-            const <cq.variable.name> = ref(0);<}>
-            <for (/AComputedQuestion cq := f) {>
-            function <cq.variable.name>Evaluation() {
-              <cq.variable.name>.value = <expr2js(cq.expression)>;
-            }<}>
+  return "
+    function updateAll() {
+      alert(\'updateAll\');
+    }
 
-            function updateAll() {<for (/AComputedQuestion cq := f) {>
-              <cq.variable.name>Evaluation();
-              <}>
-            }
-          
-          return {<for (/AQuestion q := f) {>
-            <q.variable.name>,<}><for (/AComputedQuestion cq := f) {>
-            <cq.variable.name>,<}>
-            updateAll
-          }
-        }
-      
-    }).mount(\'#app\');
+    function Block({ statements }) {
+      return React.createElement(\'div\', null, ...statements);
+    }
+
+    function IfThen({ condition, thenBlock }) {
+      if (!condition) {
+        return null;
+      }
+      return React.createElement(\'div\', null, thenBlock);
+    }
+
+    function Question({ label, variable, handleInputChange, type }) {
+      return React.createElement(
+          \'span\', null,
+          React.createElement(\'label\', {
+            for: label
+          }, label),
+          React.createElement(\'input\', {
+            id: label,
+            name: label,
+            onInput: (e) =\> {
+              handleInputChange(`${variable}`, e.target.value);
+            },
+            type: type
+          })
+        );
+    }
+
+    function BooleanQuestion({ label, variable, handleInputChange }) {
+      return React.createElement(
+          \'span\', null,
+          React.createElement(\'label\', {
+            for: label
+          }, label),
+          React.createElement(\'input\', {
+            id: label,
+            name: label,
+            onInput: (e) =\> {
+              handleInputChange(`${variable}`, e.target.checked);
+            },
+            type: \"checkbox\"
+          })
+        );
+    }
+
+    function ComputedQuestion({ label, calculatedValue, type }) {
+      return React.createElement(
+          \'span\', null,
+          React.createElement(\'label\', {
+            htmlFor: label
+          }, label),
+          React.createElement(\'input\', {
+            id: label,
+            name: label,
+            disabled: true,
+            value: calculatedValue,
+            checked: calculatedValue,
+            type: type
+          })
+        );
+    }
+
+    function App() {
+      const [inputValues, setInputValues] = React.useState({
+        <for (/AQuestion q <- f) {>\"<q.variable.name>\" : \'\',
+        <}>
+      });
+
+      const [calculatedValues, setCalculatedValues] = React.useState({
+        <for (/AComputedQuestion cq <- f) {>\"<cq.variable.name>\" : \'\',
+        <}>
+      });
+
+      const handleInputChange = (variable, value) =\> {
+        setInputValues((prevInputValues) =\> ({
+          ...prevInputValues,
+          [variable]: value,
+        }));
+      };
+
+      React.useEffect(() =\> {
+        setCalculatedValues((prevCalculatedValues) =\> ({
+          ...prevCalculatedValues,
+          <for (/AComputedQuestion cq <- f) {>
+          [\"<cq.variable.name>\"]: <expr2js(cq.expression)>,
+          <}>
+        }));
+        console.log(calculatedValues);  
+      }, [inputValues]);
+
+      return <block2js(f.block)>;
+    }
+
+    ReactDOM.render(React.createElement(App), document.getElementById(\'root\'));
     ";
 }
 
 str expr2js(AExpr e) {
   switch(e) {
-    case (AExpr) e: ref(id(expr)): return "<expr>.value";
-    case (AExpr) e: \int(intval): return "<intval>";
-    case (AExpr) e: \bool(boolval): return "<boolval>";
-    case (AExpr) e: \str(strval): return "<strval>";
-    case (AExpr) e: unaryOp(expr, op): return op + expr2js(expr);
-    case (AExpr) e: binaryOp(lhs, rhs, op): return expr2js(lhs) + op + expr2js(rhs);
+    case ref(id(expr)): return "inputValues[\"<expr>\"]";
+    case \int(intval): return "<intval>";
+    case \bool(boolval): return "<boolval>";
+    case \str(strval): return "<strval>";
+    case par(expr): return "("+expr2js(expr)+")";
+    case neg(expr): return "!("+expr2js(expr)+")";
+    case mul(lhs, rhs): return expr2js(lhs) + " * " + expr2js(rhs);
+    case div(lhs, rhs): return expr2js(lhs) + " / " + expr2js(rhs);
+    case add(lhs, rhs): return expr2js(lhs) + " + " + expr2js(rhs);
+    case sub(lhs, rhs): return expr2js(lhs) + " - " + expr2js(rhs);
+    case lt(lhs, rhs): return expr2js(lhs) + " \< " + expr2js(rhs);
+    case le(lhs, rhs): return expr2js(lhs) + " \<= " + expr2js(rhs);
+    case gt(lhs, rhs): return expr2js(lhs) + " \> " + expr2js(rhs);
+    case ge(lhs, rhs): return expr2js(lhs) + " \>= " + expr2js(rhs);
+    case and(lhs, rhs): return expr2js(lhs) + " && " + expr2js(rhs);
+    case and(lhs, rhs): return expr2js(lhs) + " || " + expr2js(rhs);
+    case equal(lhs, rhs): return expr2js(lhs) + " == " + expr2js(rhs);
+    case ne(lhs, rhs): return expr2js(lhs) + " != " + expr2js(rhs);
     
   }
   return "0";
