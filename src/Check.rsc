@@ -196,6 +196,8 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       return tbool();
     case \str(_):
       return tstr();
+    case par(AExpr x):
+      return typeOf(x, tenv, useDef);
     case neg(AExpr x):
       if (typeOf(x, tenv, useDef) == tbool()) {
         return tbool();

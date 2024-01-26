@@ -35,7 +35,7 @@ HTMLElement form2html(AForm f) {
         text("label { display: block; }"),
         text("div { padding: 1em; }"),
         text("div div { margin-left: 1em; }"),
-        text("div:nth-child(even) { background-color: #eef; }"),
+        text("div div { background-color: #eef; }"),
         text("input[type=text] { width: 100%; }"),
         text("input[type=number] { width: 100%; }"),
         text("input[type=checkbox] { width: 100%; }"),
@@ -45,8 +45,11 @@ HTMLElement form2html(AForm f) {
       script([], src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js")
     ]),
     body([
+      h1([
+        text(f.name)
+      ]),
       div([], \id="root"),
-      script([], src="tax.js")
+      script([], src="<f.src[extension="js"].path>")
     ])
   ]);
 }
@@ -77,7 +80,7 @@ str statement2js(AStatement s) {
     case statement(AQuestion q): return question2js(q);
     case statement(AComputedQuestion cq): return computedQuestion2js(cq);
     case statement(AIfThen ifThen): return "React.createElement(IfThen, { condition: <expr2js(ifThen.condition)>, thenBlock: "+block2js(ifThen.thenBlock)+" })";
-    case statement(AIfThenElse ifThenElse): return "";
+    case statement(AIfThenElse ifThenElse): return "React.createElement(IfThenElse, { condition: <expr2js(ifThenElse.condition)>, thenBlock: "+block2js(ifThenElse.thenBlock)+", elseBlock: "+block2js(ifThenElse.elseBlock)+"})";
     case statement(ABlock b): return block2js(b);
   }
 
@@ -108,6 +111,13 @@ str form2js(AForm f) {
     function IfThen({ condition, thenBlock }) {
       if (!condition) {
         return null;
+      }
+      return React.createElement(\'div\', null, thenBlock);
+    }
+
+    function IfThenElse({ condition, thenBlock, elseBlock }) {
+      if (!condition) {
+        return React.createElement(\'div\', null, elseBlock);
       }
       return React.createElement(\'div\', null, thenBlock);
     }
