@@ -63,7 +63,7 @@ syntax Expr
   ;
   
 syntax Type
-  = "boolean" | "integer";
+  = "boolean" | "integer" | "string";
 
 // TODO: allow use of \" in strings
 lexical Str

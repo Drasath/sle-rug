@@ -67,12 +67,16 @@ str question2js(AQuestion q) {
   if (q.\type == tbool()) {
     return "React.createElement(BooleanQuestion, { label: "+q.label+", variable: \""+q.variable.name+"\", handleInputChange: handleInputChange })";
   } else {
-    return "React.createElement(Question, { label: "+q.label+", variable: \""+q.variable.name+"\", type:\""+getInputType(q.\type)+"\", handleInputChange: handleInputChange })";
+    return "React.createElement(Question, { label: "+q.label+", variable: \""+q.variable.name+"\", value: inputValues[\""+q.variable.name+"\"], type:\""+getInputType(q.\type)+"\", handleInputChange: handleInputChange })";
   }
 }
 
 str computedQuestion2js(AComputedQuestion cq) {
-  return "React.createElement(ComputedQuestion, { label: "+cq.label+", type:\""+getInputType(cq.\type)+"\", calculatedValue: calculatedValues[\""+cq.variable.name+"\"] })";
+  if (cq.\type == tbool()) {
+    return "React.createElement(BooleanComputedQuestion, { label: "+cq.label+", calculatedValue: calculatedValues[\""+cq.variable.name+"\"] })";
+  } else {
+    return "React.createElement(ComputedQuestion, { label: "+cq.label+", type:\""+getInputType(cq.\type)+"\", calculatedValue: calculatedValues[\""+cq.variable.name+"\"] })";
+  }
 }
 
 str statement2js(AStatement s) {
@@ -100,10 +104,6 @@ str block2js(ABlock b) {
 
 str form2js(AForm f) {
   return "
-    function updateAll() {
-      alert(\'updateAll\');
-    }
-
     function Block({ statements }) {
       return React.createElement(\'div\', null, ...statements);
     }
@@ -122,11 +122,11 @@ str form2js(AForm f) {
       return React.createElement(\'div\', null, thenBlock);
     }
 
-    function Question({ label, variable, handleInputChange, type }) {
+    function Question({ label, variable, value, handleInputChange, type }) {
       return React.createElement(
           \'span\', null,
           React.createElement(\'label\', {
-            for: label
+            htmlFor: label
           }, label),
           React.createElement(\'input\', {
             id: label,
@@ -134,7 +134,8 @@ str form2js(AForm f) {
             onInput: (e) =\> {
               handleInputChange(`${variable}`, e.target.value);
             },
-            type: type
+            type: type,
+            value: value
           })
         );
     }
@@ -143,7 +144,7 @@ str form2js(AForm f) {
       return React.createElement(
           \'span\', null,
           React.createElement(\'label\', {
-            for: label
+            htmlFor: label
           }, label),
           React.createElement(\'input\', {
             id: label,
@@ -167,11 +168,27 @@ str form2js(AForm f) {
             name: label,
             disabled: true,
             value: calculatedValue,
-            checked: calculatedValue,
             type: type
           })
         );
     }
+
+    function BooleanComputedQuestion({ label, calculatedValue }) {
+      return React.createElement(
+          \'span\', null,
+          React.createElement(\'label\', {
+            htmlFor: label
+          }, label),
+          React.createElement(\'input\', {
+            id: label,
+            name: label,
+            disabled: true,
+            checked: calculatedValue,
+            type: \"checkbox\"
+          })
+        );
+    }
+
 
     function App() {
       const [inputValues, setInputValues] = React.useState({
@@ -192,13 +209,16 @@ str form2js(AForm f) {
       };
 
       React.useEffect(() =\> {
-        setCalculatedValues((prevCalculatedValues) =\> ({
-          ...prevCalculatedValues,
-          <for (/AComputedQuestion cq <- f) {>
-          [\"<cq.variable.name>\"]: <expr2js(cq.expression)>,
+        setCalculatedValues((prevCalculatedValues) =\> {
+          <for (/AComputedQuestion cq <- f) {>const <cq.variable.name> = <expr2js(cq.expression)>;
           <}>
-        }));
-        console.log(calculatedValues);  
+          return {
+            ...prevCalculatedValues,
+            <for (/AComputedQuestion cq <- f) {><cq.variable.name> : <cq.variable.name>,
+            <}>
+          };
+        }); 
+        
       }, [inputValues]);
 
       return <block2js(f.block)>;
@@ -210,7 +230,7 @@ str form2js(AForm f) {
 
 str expr2js(AExpr e) {
   switch(e) {
-    case ref(id(expr)): return "inputValues[\"<expr>\"]";
+    case ref(id(expr)): return "(inputValues[\"<expr>\"] !== undefined ? inputValues[\"<expr>\"] : <expr>)";
     case \int(intval): return "<intval>";
     case \bool(boolval): return "<boolval>";
     case \str(strval): return "<strval>";

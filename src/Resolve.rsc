@@ -27,18 +27,7 @@ RefGraph resolve(AForm f) = <us, ds, us o ds>
 
 Use uses(AForm f) {
   // get all top level statements in the form's block
-  list[AStatement] ss = [s | AStatement s <- f.block.statements];
-
-  // Deep match to get all nested statements
-  for (/AIfThen i <- ss) {
-    ss += i.thenBlock.statements;
-  }
-  for (/AIfThenElse i <- ss) {
-    ss += i.thenBlock.statements + i.elseBlock.statements;
-  }
-  for (/ABlock b <- ss) {
-    ss += b.statements;
-  }
+  list[AStatement] ss = [s | /AStatement s <- f];
 
   // In QL, variables can be used in expressions, which only occur in computed questions, if-then and if-then-else conditions
   // Get all nested expressions in the expression
@@ -53,18 +42,7 @@ Use uses(AForm f) {
 
 Def defs(AForm f) {
   // Get all top level statements in the form's block
-  list[AStatement] ss = [s | AStatement s <- f.block.statements];
-
-  // Deep match to get all nested statements
-  for (/AIfThen i <- ss) {
-    ss += i.thenBlock.statements;
-  }
-  for (/AIfThenElse i <- ss) {
-    ss += i.thenBlock.statements + i.elseBlock.statements;
-  }
-  for (/ABlock b <- ss) {
-    ss += b.statements;
-  }
+  list[AStatement] ss = [s | /AStatement s <- f.block.statements];
 
   // In QL, variables can only be declared in questions and computed questions
   list[AId] ids = [q.variable | s <- ss, AQuestion q <- s];

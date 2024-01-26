@@ -77,7 +77,7 @@ default AType cst2ast(Type t) {
   switch(t) {
     case (Type) `integer`: return tint();
     case (Type) `boolean`: return tbool();
-    // case (Type) `string`: return tstr();
+    case (Type) `string`: return tstr();
   }
 
   return tunknown();

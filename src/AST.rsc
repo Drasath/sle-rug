@@ -56,7 +56,6 @@ data AExpr(loc src = |tmp:///|)
   | ne(AExpr left, AExpr right)
   | and(AExpr left, AExpr right)
   | or(AExpr left, AExpr right)
-  | min(AExpr expr)
   ;
 
 data AId(loc src = |tmp:///|)

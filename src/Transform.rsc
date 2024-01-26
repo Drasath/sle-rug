@@ -29,6 +29,7 @@ import AST;
  */
  
 AForm flatten(AForm f) {
+  // ?
   return f; 
 }
 
@@ -41,7 +42,6 @@ AForm flatten(AForm f) {
  
 start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
   // for each location find in def/use find in form and rename
-
-  
+  // ?
   return f; 
 } 
