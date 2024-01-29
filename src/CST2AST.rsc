@@ -32,7 +32,7 @@ AStatement cst2ast(Statement s) {
 }
 
 default AQuestion cst2ast(Question q) {
-  return question(id("<q.variable>", src=q.src), "<q.label>", cst2ast(q.\type), src=q.src);
+  return question(id("<q.variable>", src=q.variable.src), "<q.label>", cst2ast(q.\type), src=q.src);
 }
 
 AComputedQuestion cst2ast(ComputedQuestion cq) {
@@ -75,10 +75,9 @@ AExpr cst2ast(Expr e) {
 
 default AType cst2ast(Type t) {
   switch(t) {
-    case (Type) `integer`: return tint();
-    case (Type) `boolean`: return tbool();
-    case (Type) `string`: return tstr();
+    case (Type) `integer`: return tint(src=t.src);
+    case (Type) `boolean`: return tbool(src=t.src);
+    case (Type) `string`: return tstr(src=t.src);
   }
-
-  return tunknown();
+  return tint(src=t.src);
 }

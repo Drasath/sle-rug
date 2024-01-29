@@ -3,6 +3,7 @@ module Transform
 import Syntax;
 import Resolve;
 import AST;
+import IO;
 
 /* 
  * Transforming QL forms
@@ -29,8 +30,19 @@ import AST;
  */
  
 AForm flatten(AForm f) {
+  // for each if statement in form, find all nested if statements and flatten
   // ?
-  return f; 
+  visit(f) {
+    case /AIfThen ifThen: {
+      ifThen.condition = \bool(true);
+    }
+  }
+
+  for (/AIfThen ifThen := f) {
+    println(ifThen.condition);
+  }
+
+  return f;
 }
 
 /* Rename refactoring:
@@ -42,6 +54,12 @@ AForm flatten(AForm f) {
  
 start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
   // for each location find in def/use find in form and rename
-  // ?
+
+  // Get def
+  set[loc] def = useDef[useOrDef];
+  // Get all uses
+  println(useOrDef);
+  println(def);
+
   return f; 
 } 

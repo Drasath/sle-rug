@@ -65,5 +65,4 @@ data AType(loc src = |tmp:///|)
   = tint()
   | tbool()
   | tstr()
-  | tunknown()
   ;

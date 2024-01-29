@@ -38,9 +38,10 @@ Type Atype2Type(AType t) {
       return tbool();
     case tstr():
       return tstr();
+    default:
+      return tint();
   }
   
-  return tunknown();
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
