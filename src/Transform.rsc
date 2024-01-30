@@ -32,15 +32,12 @@ import IO;
 AForm flatten(AForm f) {
   // for each if statement in form, find all nested if statements and flatten
   // ?
-  visit(f) {
-    case /AIfThen ifThen: {
-      ifThen.condition = \bool(true);
-    }
-  }
 
-  for (/AIfThen ifThen := f) {
-    println(ifThen.condition);
-  }
+  // TODO: actually flatten the if statements, right now it just adds true to the condition
+  f = visit(f) {
+    case ifThen(cond, block) => ifThen(and(\bool(true), cond), block)
+    case ifThenElse(cond, block1, block2) => ifThenElse(and(\bool(true), cond), block1, block2)
+  };
 
   return f;
 }
@@ -58,8 +55,14 @@ start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
   // Get def
   set[loc] def = useDef[useOrDef];
   // Get all uses
-  println(useOrDef);
+  
+  
   println(def);
+
+  // TODO: rename all occurrences, not all ids
+  f = visit (f) {
+    case (Expr) `<Id x>` => (Expr) `<Id newName>`
+  }
 
   return f; 
 } 
