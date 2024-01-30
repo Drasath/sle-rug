@@ -4,6 +4,7 @@ import Syntax;
 import Resolve;
 import AST;
 import IO;
+import ParseTree; // used to get src location of Ids
 
 /* 
  * Transforming QL forms
@@ -28,16 +29,31 @@ import IO;
  * Write a transformation that performs this flattening transformation.
  *
  */
- 
-AForm flatten(AForm f) {
-  // for each if statement in form, find all nested if statements and flatten
-  // ?
 
-  // TODO: actually flatten the if statements, right now it just adds true to the condition
-  f = visit(f) {
-    case ifThen(cond, block) => ifThen(and(\bool(true), cond), block)
-    case ifThenElse(cond, block1, block2) => ifThenElse(and(\bool(true), cond), block1, block2)
+AForm flatten(AForm f) {
+  AExpr conditions = \bool(true);
+  ABlock newBlock = block([]);
+
+  visit (f) {
+    case statement(AIfThen ifStatement) => {
+      conditions = and(conditions, ifStatement.condition);
+      ifStatement.condition = conditions;
+      newBlock.statements += [statement(ifStatement)];
+      statement(block([]));
+    }
+    case statement(AIfThenElse ifStatement) => {
+      conditions = and(conditions, ifStatement.condition);
+      ifStatement.condition = conditions;
+      newBlock.statements += [statement(ifStatement)];
+      statement(block([]));
+    }
+    case statement(s) => {
+      newBlock.statements += [statement(s)];
+      statement(s);
+    }
   };
+
+  f.block = newBlock;
 
   return f;
 }
@@ -52,16 +68,20 @@ AForm flatten(AForm f) {
 start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
   // for each location find in def/use find in form and rename
 
-  // Get def
-  set[loc] def = useDef[useOrDef];
-  // Get all uses
-  
-  
-  println(def);
+  // Get defs (can be multiple)
+  set[loc] defs = useDef[useOrDef];
 
-  // TODO: rename all occurrences, not all ids
+  // Get all uses
+  set[loc] uses = {use | <use, def> <- useDef, def <- defs};
+
   f = visit (f) {
-    case (Expr) `<Id x>` => (Expr) `<Id newName>`
+    case (Id) x => {
+      if (x.src in defs || x.src in uses) {
+        x = parse(#Id, newName);
+      } else {
+        x;
+      }
+    }
   }
 
   return f; 
