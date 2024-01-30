@@ -3,7 +3,6 @@ module Transform
 import Syntax;
 import Resolve;
 import AST;
-import IO;
 import ParseTree; // used to get src location of Ids
 
 /* 
