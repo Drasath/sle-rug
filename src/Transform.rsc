@@ -32,28 +32,30 @@ import ParseTree; // used to get src location of Ids
 
 AForm flatten(AForm f) {
   AExpr conditions = \bool(true);
-  ABlock newBlock = block([]);
 
-  visit (f) {
+  // First pass, change all conditions  
+  f = top-down visit(f) {
+    case AIfThen ifStatement => {
+      conditions = and(conditions, ifStatement.condition);
+      ifStatement.condition = conditions;
+      ifStatement;
+    }
+  }
+
+  f.block.statements = [statement(ifThen(\bool(true), block(f.block.statements)))];
+
+  // Second pass, move all if statements to the top
+  list[AStatement] newStatements = [];
+
+  f = visit(f) {
     case statement(AIfThen ifStatement) => {
-      conditions = and(conditions, ifStatement.condition);
-      ifStatement.condition = conditions;
-      newBlock.statements += [statement(ifStatement)];
-      statement(block([]));
+      newStatements += statement(ifStatement);
+      statement(block([])); // Don't know how to remove a node so replace with empty block
     }
-    case statement(AIfThenElse ifStatement) => {
-      conditions = and(conditions, ifStatement.condition);
-      ifStatement.condition = conditions;
-      newBlock.statements += [statement(ifStatement)];
-      statement(block([]));
-    }
-    case statement(s) => {
-      newBlock.statements += [statement(s)];
-      statement(s);
-    }
-  };
+  }
 
-  f.block = newBlock;
+  // Add to root block, in reverse order (we want the previous visit to be bottom-up)
+  f.block.statements += reverse(newStatements); // reverse to somewhat preserve order
 
   return f;
 }
